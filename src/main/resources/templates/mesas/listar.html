@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Mesas</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="page-header">
+            <h2 class="page-title"><i class="fas fa-th-large"></i> Gestión de Mesas</h2>
+            <a href="/mesas/nuevo" class="btn btn-primary" sec:authorize="hasRole('ADMIN')">
+                <i class="fas fa-plus-circle"></i> Nueva Mesa
+            </a>
+        </div>
+
+        <div class="grid-layout">
+            <div class="grid-item" th:each="mesa : ${mesas}">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3><i class="fas fa-th-large"></i></h3>
+                        <h4>Mesa #<span th:text="${mesa.numero}"></span></h4>
+                        <p class="mb-2">
+                            <i class="fas fa-users"></i> Capacidad: 
+                            <strong th:text="${mesa.capacidad}"></strong> personas
+                        </p>
+                        <p class="mb-3">
+                            <span th:if="${mesa.estado == 'DISPONIBLE'}" class="badge badge-success">Disponible</span>
+                            <span th:if="${mesa.estado == 'OCUPADA'}" class="badge badge-danger">Ocupada</span>
+                            <span th:if="${mesa.estado == 'RESERVADA'}" class="badge badge-warning">Reservada</span>
+                            <span th:if="${mesa.estado == 'MANTENIMIENTO'}" class="badge badge-secondary">Mantenimiento</span>
+                        </p>
+                        <div class="button-group">
+                            <!-- Solo ADMIN puede editar/eliminar mesas -->
+                            <a th:href="@{/mesas/editar/{id}(id=${mesa.idMesa})}" 
+                               class="btn btn-sm btn-warning"
+                               sec:authorize="hasRole('ADMIN')">
+                                <i class="fas fa-pencil-alt"></i> Editar
+                            </a>
+                            <a th:href="@{/mesas/eliminar/{id}(id=${mesa.idMesa})}" 
+                               class="btn btn-sm btn-danger"
+                               sec:authorize="hasRole('ADMIN')"
+                               onclick="return confirm('¿Está seguro?')">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </a>
+                            <!-- MOZO solo ve el estado de las mesas -->
+                            <span class="text-muted small" sec:authorize="hasRole('MOZO')">
+                                <i class="fas fa-info-circle"></i> Solo lectura
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

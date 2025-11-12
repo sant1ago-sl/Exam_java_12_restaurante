@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Plato</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2 class="mb-4">
+                    <i class="bi bi-egg-fried"></i> 
+                    <span th:text="${plato.idPlato != null ? 'Editar Plato' : 'Nuevo Plato'}"></span>
+                </h2>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form th:action="@{/platos/guardar}" method="post" th:object="${plato}">
+                            <input type="hidden" th:field="*{idPlato}">
+                            
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="nombre" class="form-label">Nombre del Plato *</label>
+                                    <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="tipo" class="form-label">Tipo *</label>
+                                    <select class="form-select" id="tipo" th:field="*{tipo}" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="ENTRADA">Entrada</option>
+                                        <option value="FONDO">Fondo</option>
+                                        <option value="POSTRE">Postre</option>
+                                        <option value="BEBIDA">Bebida</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="precio" class="form-label">Precio (S/) *</label>
+                                    <input type="number" class="form-control" id="precio" th:field="*{precio}" 
+                                           step="0.01" min="0" required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check mt-4">
+                                        <input type="checkbox" class="form-check-input" id="estado" th:field="*{estado}">
+                                        <label class="form-check-label" for="estado">
+                                            Plato Disponible
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/platos" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes - Restaurante Gourmet</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            padding-top: 90px;
+            margin-left: 250px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 70px;
+            width: 250px;
+            z-index: 1000;
+        }
+
+        .nav-link {
+            color: white !important;
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white !important;
+            opacity: 1;
+        }
+        
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.3);
+            color: white !important;
+            opacity: 1;
+            border-left: 4px solid white;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .page-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0;
+                padding: 15px;
+                padding-top: 80px;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(44, 62, 80, 0.95); backdrop-filter: blur(10px);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-utensils me-2"></i>
+                Restaurante Gourmet
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">Bienvenido, Admin</span>
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Perfil</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="nav flex-column">
+            <a class="nav-link" href="/dashboard">
+                <i class="fas fa-home me-2"></i>
+                Dashboard
+            </a>
+            <a class="nav-link active" href="/clientes">
+                <i class="fas fa-users me-2"></i>
+                Clientes
+            </a>
+            <a class="nav-link" href="/pedidos">
+                <i class="fas fa-concierge-bell me-2"></i>
+                Pedidos
+            </a>
+            <a class="nav-link" href="/platos">
+                <i class="fas fa-utensils me-2"></i>
+                Platos
+            </a>
+            <a class="nav-link" href="/mesas">
+                <i class="fas fa-table me-2"></i>
+                Mesas
+            </a>
+            <a class="nav-link" href="/facturas">
+                <i class="fas fa-file-invoice-dollar me-2"></i>
+                Facturas
+            </a>
+            <a class="nav-link" href="/ventas">
+                <i class="fas fa-chart-line me-2"></i>
+                Ventas
+            </a>
+            <a class="nav-link" href="/inventario">
+                <i class="fas fa-warehouse me-2"></i>
+                Inventario
+            </a>
+            <a class="nav-link" href="/admin/usuarios">
+                <i class="fas fa-user-shield me-2"></i>
+                Administración
+            </a>
+            <a class="nav-link" href="/bitacora">
+                <i class="fas fa-history me-2"></i>
+                Bitácora
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Gestión de Clientes
+                </h1>
+                <a href="/clientes/nuevo" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Nuevo Cliente
+                </a>
+            </div>
+        </div>
+
+        <!-- Clients Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>DNI</th>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cliente : ${clientes}">
+                                <td th:text="${cliente.idCliente}"></td>
+                                <td th:text="${cliente.dni}"></td>
+                                <td th:text="${cliente.nombres}"></td>
+                                <td th:text="${cliente.apellidos}"></td>
+                                <td th:text="${cliente.telefono}"></td>
+                                <td th:text="${cliente.correo}"></td>
+                                <td>
+                                    <span th:if="${cliente.estado}" class="badge bg-success">Activo</span>
+                                    <span th:unless="${cliente.estado}" class="badge bg-danger">Inactivo</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <!-- Solo ADMIN puede editar/eliminar clientes -->
+                                        <a th:href="@{/clientes/editar/{id}(id=${cliente.idCliente})}" 
+                                           class="btn btn-sm btn-outline-primary"
+                                           sec:authorize="hasRole('ADMIN')">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/clientes/eliminar/{id}(id=${cliente.idCliente})}" 
+                                           class="btn btn-sm btn-outline-danger"
+                                           sec:authorize="hasRole('ADMIN')"
+                                           onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                    <!-- MOZO solo ve los datos -->
+                                    <span class="badge bg-info" sec:authorize="hasRole('MOZO')">
+                                        <i class="fas fa-eye me-1"></i> Solo lectura
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

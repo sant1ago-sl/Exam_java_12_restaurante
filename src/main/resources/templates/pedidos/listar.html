@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Pedidos</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="page-header">
+            <h2 class="page-title"><i class="fas fa-shopping-cart"></i> Gestión de Pedidos</h2>
+            <div>
+                <!-- Solo COCINERO y ADMIN ven Vista Cocina -->
+                <a href="/pedidos/cocina" class="btn btn-warning me-2" 
+                   sec:authorize="hasAnyRole('COCINERO', 'ADMIN')">
+                    <i class="fas fa-fire"></i> Vista Cocina
+                </a>
+                <!-- Solo MOZO y ADMIN pueden crear pedidos -->
+                <a href="/pedidos/nuevo" class="btn btn-primary"
+                   sec:authorize="hasAnyRole('MOZO', 'ADMIN')">
+                    <i class="fas fa-plus-circle"></i> Nuevo Pedido
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Mesa</th>
+                                <th>Cliente</th>
+                                <th>Fecha/Hora</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="pedido : ${pedidos}">
+                                <td th:text="${pedido.idPedido}"></td>
+                                <td>Mesa #<span th:text="${pedido.mesa.numero}"></span></td>
+                                <td th:text="${pedido.cliente != null ? pedido.cliente.nombres + ' ' + pedido.cliente.apellidos : 'Sin cliente'}"></td>
+                                <td th:text="${#temporals.format(pedido.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <span th:if="${pedido.estado == 'PENDIENTE'}" class="badge badge-warning">Pendiente</span>
+                                    <span th:if="${pedido.estado == 'EN_PREPARACION'}" class="badge badge-info">En Preparación</span>
+                                    <span th:if="${pedido.estado == 'SERVIDO'}" class="badge badge-primary">Servido</span>
+                                    <span th:if="${pedido.estado == 'CERRADO'}" class="badge badge-success">Cerrado</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/pedidos/ver/{id}(id=${pedido.idPedido})}" 
+                                       class="btn btn-sm btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <!-- Solo CAJERO y ADMIN pueden facturar -->
+                                    <a th:if="${pedido.estado != 'CERRADO'}"
+                                       th:href="@{/facturas/nueva/{id}(id=${pedido.idPedido})}" 
+                                       class="btn btn-sm btn-success"
+                                       sec:authorize="hasAnyRole('CAJERO', 'ADMIN')">
+                                        <i class="fas fa-receipt"></i> Facturar
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

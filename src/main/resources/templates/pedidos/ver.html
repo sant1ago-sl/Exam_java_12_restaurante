@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Detalle del Pedido</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2 class="mb-4">
+                    <i class="bi bi-cart"></i> Detalle del Pedido #<span th:text="${pedido.idPedido}"></span>
+                </h2>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Información General</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Mesa:</strong> #<span th:text="${pedido.mesa.numero}"></span></p>
+                                <p><strong>Cliente:</strong> 
+                                    <span th:text="${pedido.cliente != null ? pedido.cliente.nombres + ' ' + pedido.cliente.apellidos : 'Sin cliente'}"></span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Fecha:</strong> <span th:text="${#temporals.format(pedido.fechaHora, 'dd/MM/yyyy HH:mm')}"></span></p>
+                                <p><strong>Estado:</strong>
+                                    <span th:if="${pedido.estado == 'PENDIENTE'}" class="badge bg-warning">Pendiente</span>
+                                    <span th:if="${pedido.estado == 'EN_PREPARACION'}" class="badge bg-info">En Preparación</span>
+                                    <span th:if="${pedido.estado == 'SERVIDO'}" class="badge bg-primary">Servido</span>
+                                    <span th:if="${pedido.estado == 'CERRADO'}" class="badge bg-success">Cerrado</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Detalle de Productos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Plato</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="detalle : ${pedido.detalles}">
+                                        <td th:text="${detalle.plato.nombre}"></td>
+                                        <td th:text="${detalle.cantidad}"></td>
+                                        <td>S/ <span th:text="${detalle.plato.precio}"></span></td>
+                                        <td>S/ <span th:text="${detalle.subtotal}"></span></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3" class="text-end">TOTAL:</th>
+                                        <th>S/ <span th:text="${#aggregates.sum(pedido.detalles.![subtotal])}"></span></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="/pedidos" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                    <!-- Solo CAJERO y ADMIN pueden generar facturas -->
+                    <div th:if="${pedido.estado != 'CERRADO'}" sec:authorize="hasAnyRole('CAJERO', 'ADMIN')">
+                        <a th:href="@{/facturas/nueva/{id}(id=${pedido.idPedido})}" 
+                           class="btn btn-success">
+                            <i class="bi bi-receipt"></i> Generar Factura
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

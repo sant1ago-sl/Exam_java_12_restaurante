@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Vista Cocina</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5">
+                    <i class="bi bi-egg-fried"></i> Vista de Cocina
+                </h1>
+                <p class="text-muted">Gestión de pedidos en tiempo real</p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tablero Kanban de Pedidos -->
+        <div class="row">
+            <!-- PENDIENTES -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history"></i> Pedidos Pendientes
+                            <span class="badge bg-dark" th:text="${#lists.size(pedidosPendientes)}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                        <div th:if="${#lists.isEmpty(pedidosPendientes)}" class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No hay pedidos pendientes
+                        </div>
+                        
+                        <div th:each="pedido : ${pedidosPendientes}" class="card mb-3 shadow-sm">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>
+                                        <i class="bi bi-grid-3x3"></i> Mesa <span th:text="${pedido.mesa.numero}">1</span>
+                                    </strong>
+                                    <span class="badge bg-warning" th:text="${#temporals.format(pedido.fecha, 'HH:mm')}">10:30</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="bi bi-person"></i> <span th:text="${pedido.cliente.nombre}">Cliente</span>
+                                </h6>
+                                
+                                <ul class="list-unstyled mb-3">
+                                    <li th:each="detalle : ${pedido.detalles}" class="mb-1">
+                                        <span class="badge bg-secondary" th:text="${detalle.cantidad}">1</span>
+                                        <strong th:text="${detalle.plato.nombre}">Plato</strong>
+                                    </li>
+                                </ul>
+                                
+                                <div th:if="${pedido.observaciones}" class="alert alert-warning py-2">
+                                    <small><i class="bi bi-chat-left-text"></i> <span th:text="${pedido.observaciones}">Obs</span></small>
+                                </div>
+                                
+                                <!-- Solo COCINERO puede cambiar estados de preparación -->
+                                <form th:action="@{/pedidos/cambiar-estado/{id}(id=${pedido.id})}" method="post"
+                                      sec:authorize="hasRole('COCINERO')">
+                                    <input type="hidden" name="estado" value="EN_PREPARACION">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                        <i class="bi bi-play-fill"></i> Iniciar Preparación
+                                    </button>
+                                </form>
+                                <!-- ADMIN solo puede ver el estado -->
+                                <div sec:authorize="hasRole('ADMIN')" class="alert alert-info py-2 mb-0">
+                                    <small><i class="bi bi-eye"></i> Vista de solo lectura (ADMIN)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EN PREPARACIÓN -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-fire"></i> En Preparación
+                            <span class="badge bg-dark" th:text="${#lists.size(pedidosEnPreparacion)}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                        <div th:if="${#lists.isEmpty(pedidosEnPreparacion)}" class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No hay pedidos en preparación
+                        </div>
+                        
+                        <div th:each="pedido : ${pedidosEnPreparacion}" class="card mb-3 shadow-sm border-primary">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>
+                                        <i class="bi bi-grid-3x3"></i> Mesa <span th:text="${pedido.mesa.numero}">1</span>
+                                    </strong>
+                                    <span class="badge bg-primary" th:text="${#temporals.format(pedido.fecha, 'HH:mm')}">10:30</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="bi bi-person"></i> <span th:text="${pedido.cliente.nombre}">Cliente</span>
+                                </h6>
+                                
+                                <ul class="list-unstyled mb-3">
+                                    <li th:each="detalle : ${pedido.detalles}" class="mb-1">
+                                        <span class="badge bg-secondary" th:text="${detalle.cantidad}">1</span>
+                                        <strong th:text="${detalle.plato.nombre}">Plato</strong>
+                                    </li>
+                                </ul>
+                                
+                                <div th:if="${pedido.observaciones}" class="alert alert-warning py-2">
+                                    <small><i class="bi bi-chat-left-text"></i> <span th:text="${pedido.observaciones}">Obs</span></small>
+                                </div>
+                                
+                                <!-- Solo COCINERO puede cambiar estados de preparación -->
+                                <form th:action="@{/pedidos/cambiar-estado/{id}(id=${pedido.id})}" method="post"
+                                      sec:authorize="hasRole('COCINERO')">
+                                    <input type="hidden" name="estado" value="LISTO">
+                                    <button type="submit" class="btn btn-success btn-sm w-100">
+                                        <i class="bi bi-check-circle"></i> Marcar como Listo
+                                    </button>
+                                </form>
+                                <!-- ADMIN solo puede ver el estado -->
+                                <div sec:authorize="hasRole('ADMIN')" class="alert alert-info py-2 mb-0">
+                                    <small><i class="bi bi-eye"></i> Vista de solo lectura (ADMIN)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Instrucciones:</h6>
+                <ul class="mb-0">
+                    <li><strong>Pendiente:</strong> Pedidos recién recibidos que necesitan comenzar a prepararse</li>
+                    <li><strong>En Preparación:</strong> Pedidos que están siendo cocinados actualmente</li>
+                    <li><strong>Listo:</strong> Una vez terminado, marca como listo para que el mozo lo entregue</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

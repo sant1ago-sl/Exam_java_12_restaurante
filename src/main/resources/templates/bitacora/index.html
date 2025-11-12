@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${titulo}">Bitácora</title>
+</head>
+<body>
+    <section>
+        <div class="page-container">
+            <!-- Encabezado -->
+            <div class="page-header">
+                <h2 class="page-title"><i class="fas fa-book"></i> <span th:text="${titulo}">Bitácora de Auditoría</span></h2>
+            </div>
+
+            <!-- Mensajes flash -->
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form action="/bitacora/filtrar" method="get" class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Tabla</label>
+                            <select name="tabla" class="form-select">
+                                <option value="">Todas</option>
+                                <option value="pedido">Pedidos</option>
+                                <option value="cliente">Clientes</option>
+                                <option value="mesa">Mesas</option>
+                                <option value="plato">Platos</option>
+                                <option value="insumo">Insumos</option>
+                                <option value="usuario">Usuarios</option>
+                                <option value="factura">Facturas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Operación</label>
+                            <select name="operacion" class="form-select">
+                                <option value="">Todas</option>
+                                <option value="CREATE">Crear</option>
+                                <option value="UPDATE">Actualizar</option>
+                                <option value="DELETE">Eliminar</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla de registros -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha/Hora</th>
+                                    <th>Usuario</th>
+                                    <th>Operación</th>
+                                    <th>Tabla</th>
+                                    <th>Acción</th>
+                                    <th>Detalles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(registros)}">
+                                    <td colspan="7" class="text-center text-muted">
+                                        <i class="fas fa-inbox"></i> No hay registros de auditoría
+                                    </td>
+                                </tr>
+                                <tr th:each="registro : ${registros}">
+                                    <td th:text="${registro.idBitacora}">1</td>
+                                    <td>
+                                        <small th:text="${#temporals.format(registro.fechaHora, 'dd/MM/yyyy HH:mm:ss')}">
+                                            09/11/2025 14:30:00
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span th:if="${registro.usuario != null}" 
+                                              th:text="${registro.usuario.nombreUsuario}">admin</span>
+                                        <span th:if="${registro.usuario == null}" class="text-muted">Sistema</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${registro.operacion == 'CREATE' ? 'badge-success' : 
+                                                               registro.operacion == 'UPDATE' ? 'badge-warning' : 'badge-danger'}"
+                                              th:text="${registro.operacion}">
+                                            CREATE
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-secondary" th:text="${registro.tabla}">pedido</span>
+                                    </td>
+                                    <td>
+                                        <small th:text="${registro.accion}">Creó pedido #15</small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" 
+                                                onclick="showDetails(${registro.idBitacora})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        
+                                        <!-- Modal de detalles -->
+                                        <div class="modal" id="detalleModal${registro.idBitacora}">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Detalles del Registro</h5>
+                                                    <button type="button" class="modal-close" onclick="closeModal(${registro.idBitacora})">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <pre th:text="${registro.detalles}">Detalles aquí</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6><i class="fas fa-info-circle"></i> Información</h6>
+                    <ul class="mb-0">
+                        <li><strong>CREATE</strong>: Registro de nuevas entidades</li>
+                        <li><strong>UPDATE</strong>: Modificación de entidades existentes</li>
+                        <li><strong>DELETE</strong>: Eliminación de entidades</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function showDetails(id) {
+            const modal = document.getElementById('detalleModal' + id);
+            modal.style.display = 'block';
+        }
+        
+        function closeModal(id) {
+            const modal = document.getElementById('detalleModal' + id);
+            modal.style.display = 'none';
+        }
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

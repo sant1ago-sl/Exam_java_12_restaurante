@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Acceso Denegado</title>
+</head>
+<body>
+    <section th:fragment="section">
+        <div class="container">
+            <div class="error-container">
+                <div class="error-card">
+                    <div class="error-header">
+                        <h3><i class="fas fa-shield-alt"></i> Acceso Denegado</h3>
+                    </div>
+                    <div class="error-body">
+                        <div class="error-icon">
+                            <i class="fas fa-lock text-danger"></i>
+                        </div>
+                        
+                        <h4 class="error-title">🚫 No tienes permiso para acceder a esta página</h4>
+                        
+                        <div class="error-info">
+                            <p class="info-label"><strong>Tu rol actual:</strong></p>
+                            <span sec:authentication="principal.authorities" class="badge badge-primary"></span>
+                        </div>
+                        
+                        <p class="error-message">
+                            Esta funcionalidad está restringida a ciertos roles del sistema.
+                            Si crees que deberías tener acceso, contacta con el administrador.
+                        </p>
+                        
+                        <div class="error-actions">
+                            <a href="/dashboard" class="btn btn-primary">
+                                <i class="fas fa-home"></i> Ir al Inicio
+                            </a>
+                            <button onclick="history.back()" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </button>
+                        </div>
+                    </div>
+                    <div class="error-footer">
+                        <small><i class="fas fa-info-circle"></i> Sistema de Gestión "Sabor Gourmet"</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

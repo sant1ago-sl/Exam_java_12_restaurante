@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Nuevo Pedido</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5">
+                    <i class="bi bi-cart-plus"></i> Crear Nuevo Pedido
+                </h1>
+                <p class="text-muted">Registra un nuevo pedido de cliente</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form th:action="@{/pedidos/guardar}" method="post" th:object="${pedido}">
+                    <div class="row">
+                        <!-- Mesa -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-grid-3x3"></i> Mesa <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" th:field="*{mesa.id}" required>
+                                <option value="">Seleccionar mesa...</option>
+                                <option th:each="mesa : ${mesas}" 
+                                        th:value="${mesa.id}"
+                                        th:text="${'Mesa ' + mesa.numero + ' - ' + mesa.capacidad + ' personas'}">
+                                    Mesa 1
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Cliente -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-person"></i> Cliente <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" th:field="*{cliente.id}" required>
+                                <option value="">Seleccionar cliente...</option>
+                                <option th:each="cliente : ${clientes}" 
+                                        th:value="${cliente.id}"
+                                        th:text="${cliente.nombre + ' - ' + cliente.telefono}">
+                                    Cliente 1
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Selección de Platos -->
+                    <div class="mb-3">
+                        <h5><i class="bi bi-egg-fried"></i> Seleccionar Platos</h5>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Selecciona los platos y especifica la cantidad
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4" id="platos-container">
+                        <div class="col-md-6 col-lg-4" th:each="plato, iterStat : ${platos}">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input plato-checkbox" 
+                                               type="checkbox" 
+                                               th:id="${'plato_' + plato.id}"
+                                               th:data-id="${plato.id}"
+                                               th:data-precio="${plato.precio}">
+                                        <label class="form-check-label w-100" th:for="${'plato_' + plato.id}">
+                                            <h6 th:text="${plato.nombre}">Plato</h6>
+                                            <small class="text-muted" th:text="${plato.tipo}">Tipo</small>
+                                            <div class="mt-2">
+                                                <strong class="text-success" th:text="${'S/ ' + #numbers.formatDecimal(plato.precio, 1, 2)}">S/ 0.00</strong>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label small">Cantidad:</label>
+                                        <input type="number" 
+                                               class="form-control form-control-sm cantidad-input" 
+                                               th:id="${'cantidad_' + plato.id}"
+                                               min="1" 
+                                               value="1"
+                                               disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-chat-left-text"></i> Observaciones
+                        </label>
+                        <textarea class="form-control" th:field="*{observaciones}" rows="3" 
+                                  placeholder="Observaciones especiales del pedido..."></textarea>
+                    </div>
+
+                    <!-- Hidden inputs para los detalles del pedido -->
+                    <div id="detalles-container"></div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="/pedidos" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Crear Pedido
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const checkboxes = document.querySelectorAll('.plato-checkbox');
+                const detallesContainer = document.getElementById('detalles-container');
+                
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const platoId = this.dataset.id;
+                        const cantidadInput = document.getElementById('cantidad_' + platoId);
+                        cantidadInput.disabled = !this.checked;
+                        
+                        if (!this.checked) {
+                            cantidadInput.value = 1;
+                        }
+                        
+                        actualizarDetalles();
+                    });
+                });
+                
+                document.querySelectorAll('.cantidad-input').forEach(input => {
+                    input.addEventListener('change', actualizarDetalles);
+                });
+                
+                function actualizarDetalles() {
+                    detallesContainer.innerHTML = '';
+                    let index = 0;
+                    
+                    checkboxes.forEach(checkbox => {
+                        if (checkbox.checked) {
+                            const platoId = checkbox.dataset.id;
+                            const cantidadInput = document.getElementById('cantidad_' + platoId);
+                            const cantidad = cantidadInput.value;
+                            const precio = checkbox.dataset.precio;
+                            
+                            detallesContainer.innerHTML += `
+                                <input type="hidden" name="detalles[${index}].plato.id" value="${platoId}">
+                                <input type="hidden" name="detalles[${index}].cantidad" value="${cantidad}">
+                                <input type="hidden" name="detalles[${index}].precio" value="${precio}">
+                            `;
+                            index++;
+                        }
+                    });
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

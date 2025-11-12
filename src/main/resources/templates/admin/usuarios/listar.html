@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Usuarios</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-people"></i> Gestión de Usuarios</h2>
+            <a href="/admin/usuarios/nuevo" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nuevo Usuario
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="usuario : ${usuarios}">
+                                <td th:text="${usuario.idUsuario}"></td>
+                                <td th:text="${usuario.nombreUsuario}"></td>
+                                <td th:text="${usuario.nombre + ' ' + usuario.apellido}"></td>
+                                <td th:text="${usuario.email}"></td>
+                                <td>
+                                    <span th:if="${usuario.rol == 'ADMIN'}" class="badge bg-danger">Administrador</span>
+                                    <span th:if="${usuario.rol == 'MOZO'}" class="badge bg-primary">Mozo</span>
+                                    <span th:if="${usuario.rol == 'CAJERO'}" class="badge bg-success">Cajero</span>
+                                    <span th:if="${usuario.rol == 'COCINERO'}" class="badge bg-warning">Cocinero</span>
+                                </td>
+                                <td>
+                                    <span th:if="${usuario.estado}" class="badge bg-success">Activo</span>
+                                    <span th:unless="${usuario.estado}" class="badge bg-danger">Inactivo</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.idUsuario})}" 
+                                       class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a th:href="@{/admin/usuarios/eliminar/{id}(id=${usuario.idUsuario})}" 
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('¿Está seguro?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

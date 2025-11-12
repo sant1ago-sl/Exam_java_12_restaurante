@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Platos</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="page-header">
+            <h2 class="page-title"><i class="fas fa-utensil-spoon"></i> Menú del Restaurante</h2>
+            <a href="/platos/nuevo" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Nuevo Plato
+            </a>
+        </div>
+
+        <div class="grid-layout">
+            <div class="grid-item" th:each="plato : ${platos}">
+                <div class="card">
+                    <div class="card-body">
+                        <span class="badge badge-info mb-2" th:text="${plato.tipo}"></span>
+                        <h5 class="card-title" th:text="${plato.nombre}"></h5>
+                        <p class="card-text text-muted" th:text="${plato.descripcion}"></p>
+                        <h4 class="text-primary">S/ <span th:text="${plato.precio}"></span></h4>
+                        <p class="mb-0">
+                            <span th:if="${plato.estado}" class="badge badge-success">Disponible</span>
+                            <span th:unless="${plato.estado}" class="badge badge-danger">No Disponible</span>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="button-group" role="group">
+                            <a th:href="@{/platos/editar/{id}(id=${plato.idPlato})}" 
+                               class="btn btn-sm btn-warning">
+                                <i class="fas fa-pencil-alt"></i> Editar
+                            </a>
+                            <a th:href="@{/platos/eliminar/{id}(id=${plato.idPlato})}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('¿Está seguro?')">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

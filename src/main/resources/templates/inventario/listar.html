@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Inventario</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="page-header">
+            <h2 class="page-title"><i class="fas fa-boxes"></i> Inventario de Insumos</h2>
+            <a href="/inventario/nuevo" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Nuevo Insumo
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Unidad</th>
+                                <th>Stock</th>
+                                <th>Stock Mínimo</th>
+                                <th>Precio</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="insumo : ${insumos}">
+                                <td th:text="${insumo.idInsumo}"></td>
+                                <td th:text="${insumo.nombre}"></td>
+                                <td th:text="${insumo.unidadMedida}"></td>
+                                <td>
+                                    <span th:text="${insumo.stock}"></span>
+                                    <span th:if="${insumo.stock <= insumo.stockMinimo}" class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </span>
+                                </td>
+                                <td th:text="${insumo.stockMinimo}"></td>
+                                <td>S/ <span th:text="${insumo.precioCompra}"></span></td>
+                                <td>
+                                    <span th:if="${insumo.estado}" class="badge badge-success">Activo</span>
+                                    <span th:unless="${insumo.estado}" class="badge badge-danger">Inactivo</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/inventario/editar/{id}(id=${insumo.idInsumo})}" 
+                                       class="btn btn-sm btn-warning">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <a th:href="@{/inventario/eliminar/{id}(id=${insumo.idInsumo})}" 
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('¿Está seguro?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

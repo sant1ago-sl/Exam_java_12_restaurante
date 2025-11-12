@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Alertas de Stock</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5">
+                    <i class="bi bi-exclamation-triangle text-danger"></i> Alertas de Stock Bajo
+                </h1>
+                <p class="text-muted">Insumos que requieren reposición urgente</p>
+            </div>
+            <div class="col-auto">
+                <a href="/inventario" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver al Inventario
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(insumosStockBajo)}" class="alert alert-success">
+            <i class="bi bi-check-circle"></i> ¡Excelente! Todos los insumos tienen stock suficiente
+        </div>
+
+        <div th:if="${!#lists.isEmpty(insumosStockBajo)}" class="row g-3">
+            <div class="col-md-6 col-lg-4" th:each="insumo : ${insumosStockBajo}">
+                <div class="card border-danger shadow">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0" th:text="${insumo.nombre}">Insumo</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h3 class="text-danger mb-0" th:text="${insumo.stock}">0</h3>
+                                <small class="text-muted" th:text="${insumo.unidadMedida}">KG</small>
+                            </div>
+                            <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 th:style="${'width: ' + (insumo.stock * 100 / 100) + '%'}"
+                                 th:text="${insumo.stock + ' ' + insumo.unidadMedida}">
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/inventario/editar/{id}(id=${insumo.id})}" class="btn btn-warning">
+                                <i class="bi bi-plus-circle"></i> Reabastecer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

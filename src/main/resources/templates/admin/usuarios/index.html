@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${titulo}">Usuarios</title>
+</head>
+<body>
+    <section>
+        <div class="page-container">
+            <!-- Encabezado -->
+            <div class="page-header">
+                <h2 class="page-title"><i class="fas fa-users"></i> <span th:text="${titulo}">Gestión de Usuarios</span></h2>
+                <a href="/admin/usuarios/nuevo" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Nuevo Usuario
+                </a>
+            </div>
+
+            <!-- Mensajes flash -->
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div th:if="${error}" class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Tarjetas de resumen por rol -->
+            <div class="stats-grid">
+                <div class="stat-card danger">
+                    <div class="stat-content">
+                        <h5>ADMIN</h5>
+                        <h2 th:text="${#lists.size(#lists.select(usuarios, 'rol == ''ADMIN'''))}">0</h2>
+                        <small>Administradores</small>
+                    </div>
+                </div>
+                <div class="stat-card primary">
+                    <div class="stat-content">
+                        <h5>MOZO</h5>
+                        <h2 th:text="${#lists.size(#lists.select(usuarios, 'rol == ''MOZO'''))}">0</h2>
+                        <small>Mozos</small>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-content">
+                        <h5>COCINERO</h5>
+                        <h2 th:text="${#lists.size(#lists.select(usuarios, 'rol == ''COCINERO'''))}">0</h2>
+                        <small>Cocineros</small>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-content">
+                        <h5>CAJERO</h5>
+                        <h2 th:text="${#lists.size(#lists.select(usuarios, 'rol == ''CAJERO'''))}">0</h2>
+                        <small>Cajeros</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de usuarios -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Usuario</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(usuarios)}">
+                                    <td colspan="7" class="text-center text-muted">
+                                        <i class="fas fa-inbox"></i> No hay usuarios registrados
+                                    </td>
+                                </tr>
+                                <tr th:each="usuario : ${usuarios}">
+                                    <td th:text="${usuario.idUsuario}">1</td>
+                                    <td>
+                                        <strong th:text="${usuario.nombreUsuario}">admin</strong>
+                                    </td>
+                                    <td>
+                                        <span th:if="${usuario.nombre != null and usuario.apellido != null}"
+                                              th:text="${usuario.nombre + ' ' + usuario.apellido}">
+                                            Juan Pérez
+                                        </span>
+                                        <span th:if="${usuario.nombre == null or usuario.apellido == null}" 
+                                              class="text-muted">
+                                            -
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${usuario.email != null ? usuario.email : '-'}">
+                                            correo@example.com
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${usuario.rol == 'ADMIN' ? 'badge-danger' : 
+                                                               usuario.rol == 'MOZO' ? 'badge-primary' : 
+                                                               usuario.rol == 'COCINERO' ? 'badge-warning' : 'badge-success'}"
+                                              th:text="${usuario.rol}">
+                                            ADMIN
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${usuario.estado}" class="badge badge-success">Activo</span>
+                                        <span th:if="${!usuario.estado}" class="badge badge-secondary">Inactivo</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.idUsuario})}" 
+                                               class="btn btn-sm btn-outline">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form th:action="@{/admin/usuarios/cambiar-estado/{id}(id=${usuario.idUsuario})}" 
+                                                  method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline"
+                                                        th:title="${usuario.estado ? 'Desactivar' : 'Activar'}">
+                                                    <i th:class="${usuario.estado ? 'fas fa-toggle-on' : 'fas fa-toggle-off'}"></i>
+                                                </button>
+                                            </form>
+                                            <form th:action="@{/admin/usuarios/eliminar/{id}(id=${usuario.idUsuario})}" 
+                                                  method="post" 
+                                                  onsubmit="return confirm('¿Está seguro de eliminar este usuario?')" 
+                                                  style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
